@@ -218,6 +218,32 @@ class TestHTMLElement(unittest.TestCase):
         self.assertIsInstance(el1.to_dict(), dict)
         self.assertEqual(el1.to_dict(), should_be)
 
+    def test_html_escaping_text_content(self):
+        """Test that text content is properly escaped to prevent XSS."""
+        malicious_text = '<script>alert("XSS")</script>'
+        element = HTMLElement(malicious_text, tag="div")
+        rendered = str(element)
+        self.assertIn("&lt;script&gt;", rendered)
+        self.assertIn("&lt;/script&gt;", rendered)
+        self.assertNotIn("<script>", rendered)
+        self.assertNotIn("</script>", rendered)
+
+    def test_html_escaping_attribute_values(self):
+        """Test that attribute values are properly escaped to prevent XSS."""
+        malicious_attr = '"><script>alert("XSS")</script><div id="'
+        element = HTMLElement(tag="div", id=malicious_attr)
+        rendered = str(element)
+        self.assertIn("&quot;", rendered)
+        self.assertIn("&lt;script&gt;", rendered)
+        self.assertNotIn('"><script>', rendered)
+
+    def test_html_escaping_normal_content(self):
+        """Test that normal content is not affected by escaping."""
+        normal_text = "Hello, World!"
+        element = HTMLElement(normal_text, tag="p")
+        rendered = str(element)
+        self.assertEqual(rendered, f"<p>{normal_text}</p>")
+
 
 if __name__ == "__main__":
     unittest.main()

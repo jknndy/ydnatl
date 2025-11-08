@@ -169,7 +169,8 @@ class TestTextTags(unittest.TestCase):
         """Test the creation of a code element."""
         code = Code("print('Hello, World!')")
         self.assertEqual(code.tag, "code")
-        self.assertEqual(str(code), "<code>print('Hello, World!')</code>")
+        # Single quotes are escaped for security (&#x27;)
+        self.assertEqual(str(code), "<code>print(&#x27;Hello, World!&#x27;)</code>")
 
     def test_attributes(self):
         """Test the addition of attributes to text elements."""
