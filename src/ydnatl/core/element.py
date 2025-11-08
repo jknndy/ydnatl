@@ -2,6 +2,7 @@ import uuid
 import copy
 import os
 import functools
+import html
 
 from typing import Callable, Any, Iterator, Union, List
 
@@ -225,7 +226,7 @@ class HTMLElement:
     def _render_attributes(self) -> str:
         """Returns a string of HTML attributes for the tag."""
         attr_str = " ".join(
-            f'{("class" if k == "class_name" else k)}="{v}"'
+            f'{("class" if k == "class_name" else k)}="{html.escape(str(v), quote=True)}"'
             for k, v in self._attributes.items()
         )
         return f" {attr_str}" if attr_str else ""
@@ -240,7 +241,8 @@ class HTMLElement:
             result = f"{tag_start} />"
         else:
             children_html = "".join(child.render() for child in self._children)
-            result = f"{tag_start}>{self._text}{children_html}</{self._tag}>"
+            escaped_text = html.escape(self._text)
+            result = f"{tag_start}>{escaped_text}{children_html}</{self._tag}>"
 
         if hasattr(self, "_prefix") and self._prefix:
             result = f"{self._prefix}{result}"
